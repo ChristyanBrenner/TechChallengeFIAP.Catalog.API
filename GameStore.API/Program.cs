@@ -1,3 +1,4 @@
+using Consumers;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -80,12 +81,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddMassTransit(x =>
 {
+    x.AddConsumer<PaymentProcessedEventConsumer>();
+
     x.UsingRabbitMq((context, cfg) =>
     {
         cfg.Host("localhost", "/", h =>
         {
             h.Username("guest");
             h.Password("guest");
+        });
+
+        cfg.ReceiveEndpoint("catalog-payment-processed", e =>
+        {
+            e.ConfigureConsumer<PaymentProcessedEventConsumer>(context);
         });
     });
 });
@@ -94,12 +102,12 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Auto-migrate
-//using (var scope = app.Services.CreateScope())
-//{
-//    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-//    db.Database.Migrate();
-//}
+//Auto - migrate
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
 

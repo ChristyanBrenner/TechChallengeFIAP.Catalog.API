@@ -75,25 +75,11 @@ namespace Services
             if (jogo == null)
                 throw new ApplicationException("Jogo não encontrado");
 
-            var pedido = new Pedido()
-            {
-                UsuarioId = dto.UsuarioId,
-                JogoId = jogo.Id,
-                NomeJogo = jogo.Nome,
-                PrecoPago = jogo.Preco,
-                DataCompra = DateTime.UtcNow,
-                DataCriacao = DateTime.UtcNow
-            };
-
-            _ctx.Pedido.Add(pedido);
-            await _ctx.SaveChangesAsync();
-
             await _publishEndpoint.Publish(new OrderPlacedEvent(
-                pedido.Id,
-                pedido.UsuarioId,
-                pedido.JogoId,
-                pedido.NomeJogo,
-                pedido.PrecoPago
+                dto.UsuarioId,
+                jogo.Id,
+                jogo.Nome,
+                jogo.Preco
             ));
         }
     }
