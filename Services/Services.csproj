@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\CloudGames.Contracts\CloudGames.Contracts\CloudGames.Contracts.csproj" />
+    <ProjectReference Include="..\..\TechChallengeFIAP.Contracts\CloudGames.Contracts\CloudGames.Contracts.csproj" />
     <ProjectReference Include="..\Domain\Domain.csproj" />
     <ProjectReference Include="..\Repositories\Repositories.csproj" />
     <ProjectReference Include="..\Utils\Utils.csproj" />
