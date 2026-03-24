@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog-api-deployment
+  labels:
+    app: catalog-api
+spec:
+  replicas: 2  # Cria 2 Pods para demonstrar escalabilidade
+  selector:
+    matchLabels:
+      app: catalog-api
+  template:
+    metadata:
+      labels:
+        app: catalog-api
+    spec:
+      containers:
+        - name: catalog-api
+          image: catalog-api:latest   # Essa é a imagem Docker que você vai buildar
+          ports:
+            - containerPort: 80
+          env:
+            # Variáveis do ConfigMap (não sensíveis)
+            - name: ASPNETCORE_ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: catalog-api-config
+                  key: ASPNETCORE_ENVIRONMENT
+
+            - name: USERS_API_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: catalog-api-config
+                  key: USERS_API_URL
+
+            - name: PAYMENTS_API_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: catalog-api-config
+                  key: PAYMENTS_API_URL
+
+            - name: DEFAULT_PAGE_SIZE
+              valueFrom:
+                configMapKeyRef:
+                  name: catalog-api-config
+                  key: DEFAULT_PAGE_SIZE
+
+            - name: MAX_PAGE_SIZE
+              valueFrom:
+                configMapKeyRef:
+                  name: catalog-api-config
+                  key: MAX_PAGE_SIZE
+
+            - name: RABBITMQ_QUEUE
+              valueFrom:
+                configMapKeyRef:
+                  name: catalog-api-config
+                  key: RABBITMQ_QUEUE
+
+            # Variáveis do Secret (sensíveis)
+            - name: DATABASE_CONNECTION
+              valueFrom:
+                secretKeyRef:
+                  name: catalog-api-secret
+                  key: DATABASE_CONNECTION
+
+            - name: EXTERNAL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: catalog-api-secret
