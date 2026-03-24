@@ -6,6 +6,7 @@ API de Catálogo do serviço reponsável por expor endpoints REST para consulta 
 - ASP.NET Core Web API
 - Docker
 - Kubernetes
+- Amazon SQS
 
 ## Instruções
 SUBIR IMAGEM DOCKER LOCAL
