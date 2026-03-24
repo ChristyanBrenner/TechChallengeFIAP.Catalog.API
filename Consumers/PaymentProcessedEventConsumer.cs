@@ -1,12 +1,11 @@
-﻿using CloudGames.Contracts.Events;
-using Domain.Entities;
+﻿using Domain.Entities;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Repositories;
 
 namespace Consumers
 {
-    public class PaymentProcessedEventConsumer : IConsumer<PaymentProcessedEvent>
+    public class PaymentProcessedEventConsumer 
     {
         private readonly AppDbContext _ctx;
 
@@ -15,32 +14,32 @@ namespace Consumers
             _ctx = ctx;
         }
 
-        public async Task Consume(ConsumeContext<PaymentProcessedEvent> context)
-        {
-            var evento = context.Message;
+        //public async Task Consume(ConsumeContext<PaymentProcessedEvent> context)
+        //{
+        //    var evento = context.Message;
 
-            if (evento.Status != PaymentStatus.Approved)
-                return;
+        //    if (evento.Status != PaymentStatus.Approved)
+        //        return;
 
-            var existe = await _ctx.Pedido.AnyAsync(p =>
-            p.UsuarioId == evento.UserId &&
-            p.JogoId == evento.GameId);
+        //    var existe = await _ctx.Pedido.AnyAsync(p =>
+        //    p.UsuarioId == evento.UserId &&
+        //    p.JogoId == evento.GameId);
 
-            if (existe)
-                return;
+        //    if (existe)
+        //        return;
 
-            var pedido = new Pedido
-            {
-                UsuarioId = evento.UserId,
-                JogoId = evento.GameId,
-                NomeJogo = evento.GameName,
-                PrecoPago = evento.GamePrice,
-                DataCriacao = DateTime.UtcNow,
-                DataCompra = DateTime.UtcNow
-            };
+        //    var pedido = new Pedido
+        //    {
+        //        UsuarioId = evento.UserId,
+        //        JogoId = evento.GameId,
+        //        NomeJogo = evento.GameName,
+        //        PrecoPago = evento.GamePrice,
+        //        DataCriacao = DateTime.UtcNow,
+        //        DataCompra = DateTime.UtcNow
+        //    };
 
-            _ctx.Pedido.Add(pedido);
-            await _ctx.SaveChangesAsync();
-        }
+        //    _ctx.Pedido.Add(pedido);
+        //    await _ctx.SaveChangesAsync();
+        //}
     }
 }

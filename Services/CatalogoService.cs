@@ -1,5 +1,4 @@
-﻿using CloudGames.Contracts.Events;
-using Domain.DTOs;
+﻿using Domain.DTOs;
 using Domain.Entities;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -11,12 +10,12 @@ namespace Services
     public class CatalogoService : ICatalogoService
     {
         private readonly AppDbContext _ctx;
-        private readonly IPublishEndpoint _publishEndpoint;
+        private readonly SqsService _sqsService;
 
-        public CatalogoService(AppDbContext ctx, IPublishEndpoint publishEndpoint)
+        public CatalogoService(AppDbContext ctx, SqsService sqsService)
         {
             _ctx = ctx;
-            _publishEndpoint = publishEndpoint;
+            _sqsService = sqsService;
         }
         public async Task<List<Jogo>> ListarJogosAsync()
         {
@@ -75,12 +74,16 @@ namespace Services
             if (jogo == null)
                 throw new ApplicationException("Jogo não encontrado");
 
-            await _publishEndpoint.Publish(new OrderPlacedEvent(
-                dto.UsuarioId,
-                jogo.Id,
-                jogo.Nome,
-                jogo.Preco
-            ));
+            var evento = new
+            {
+                UsuarioId = dto.UsuarioId,
+                JogoId = jogo.Id,
+                NomeJogo = jogo.Nome,
+                Valor = jogo.Preco
+            };
+
+            await _sqsService.EnviarPedidoCriadoAsync(evento);
+            await _sqsService.EnviarPagamentoAsync(evento);
         }
     }
 }

@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.SQS" Version="4.0.2.18" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\CloudGames.Contracts\CloudGames.Contracts\CloudGames.Contracts.csproj" />
     <ProjectReference Include="..\Repositories\Repositories.csproj" />
   </ItemGroup>
