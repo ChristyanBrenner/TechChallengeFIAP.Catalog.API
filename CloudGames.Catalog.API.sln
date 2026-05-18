@@ -24,8 +24,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "k8s", "k8s", "{51EAFE0D-972
 		secret.yml = secret.yml
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CloudGames.Contracts", "..\TechChallengeFIAP.Contracts\CloudGames.Contracts\CloudGames.Contracts.csproj", "{0FB07F88-5A79-42C6-8237-E4AA3C2C2CCF}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,10 +58,6 @@ Global
 		{972B0851-AE05-489F-8644-986A940AF1B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{972B0851-AE05-489F-8644-986A940AF1B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{972B0851-AE05-489F-8644-986A940AF1B1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0FB07F88-5A79-42C6-8237-E4AA3C2C2CCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0FB07F88-5A79-42C6-8237-E4AA3C2C2CCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0FB07F88-5A79-42C6-8237-E4AA3C2C2CCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0FB07F88-5A79-42C6-8237-E4AA3C2C2CCF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
