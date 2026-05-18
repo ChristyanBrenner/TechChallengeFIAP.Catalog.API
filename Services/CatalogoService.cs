@@ -3,6 +3,7 @@ using Domain.Entities;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Repositories;
+using StackExchange.Redis;
 using Utils;
 
 namespace Services
@@ -11,21 +12,48 @@ namespace Services
     {
         private readonly AppDbContext _ctx;
         private readonly SqsService _sqsService;
+        private readonly IDatabase _cache;
+        private readonly IEventLogService _eventLogService;
 
-        public CatalogoService(AppDbContext ctx, SqsService sqsService)
+        public CatalogoService(AppDbContext ctx, SqsService sqsService, IConnectionMultiplexer redis, IEventLogService eventLogService)
         {
             _ctx = ctx;
             _sqsService = sqsService;
+            _cache = redis.GetDatabase();
+            _eventLogService = eventLogService;
         }
         public async Task<List<Jogo>> ListarJogosAsync()
         {
-            return await _ctx.Jogo.AsNoTracking().ToListAsync();
+            const string cacheKey = "catalogo:jogos";
+
+            var cache = await _cache.StringGetAsync(cacheKey);
+
+            if (cache.HasValue)
+                return System.Text.Json.JsonSerializer.Deserialize<List<Jogo>>(cache!)!;
+
+            var jogos = await _ctx.Jogo.AsNoTracking().ToListAsync();
+
+            await _cache.StringSetAsync(cacheKey, System.Text.Json.JsonSerializer.Serialize(jogos), TimeSpan.FromMinutes(10));
+
+            return jogos;
         }
         public async Task<Jogo?> ObterPorIdAsync(int id)
         {
-            return await _ctx.Jogo
-                .AsNoTracking()
-                .FirstOrDefaultAsync(j => j.Id == id);
+            var cacheKey = $"catalogo:jogo{id}";
+
+            var cache = await _cache.StringGetAsync(cacheKey);
+
+            if (cache.HasValue)
+                return System.Text.Json.JsonSerializer.Deserialize<Jogo>(cache!)!;
+
+            var jogo = await _ctx.Jogo.AsNoTracking().FirstOrDefaultAsync(j => j.Id == id);
+
+            if (jogo != null) 
+            {
+                await _cache.StringSetAsync(cacheKey, System.Text.Json.JsonSerializer.Serialize(jogo), TimeSpan.FromMinutes(10));
+            }
+
+            return jogo;
         }        
         public async Task<int> CadastrarJogoAsync(JogoDto dto)
         {
@@ -53,6 +81,20 @@ namespace Services
             _ctx.Jogo.Add(jogo);
             await _ctx.SaveChangesAsync();
 
+            await _eventLogService.RegistrarAsync(new EventLog
+            {
+                EventType = "JodoCriado",
+                Payload = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    jogo.Id,
+                    jogo.Nome,
+                    jogo.Genero,
+                    jogo.Preco
+                })
+            });
+
+            await _cache.KeyDeleteAsync("catalogo:jogos");
+
             return jogo.Id;
         }
 
@@ -66,6 +108,20 @@ namespace Services
             jogo.Preco = preco;
 
             await _ctx.SaveChangesAsync();
+
+            await _eventLogService.RegistrarAsync(new EventLog
+            {
+                EventType = "JogoAtualizado",
+                Payload = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    jogo.Id,
+                    jogo.Nome,
+                    jogo.Preco
+                })
+            });
+
+            await _cache.KeyDeleteAsync("catalogo:jogos");
+            await _cache.KeyDeleteAsync($"catalogo:jogo:{id}");
         }
         public async Task ComprarJogoAsync(PedidoDto dto)
         {
@@ -84,6 +140,12 @@ namespace Services
 
             await _sqsService.EnviarPedidoCriadoAsync(evento);
             await _sqsService.EnviarPagamentoAsync(evento);
+
+            await _eventLogService.RegistrarAsync(new EventLog
+            {
+                EventType = "PedidoCriado",
+                Payload = System.Text.Json.JsonSerializer.Serialize(evento)
+            });
         }
     }
 }

@@ -1,3 +1,5 @@
+using Amazon.DynamoDBv2;
+using Amazon.Runtime;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -5,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using Middleware;
 using Repositories;
 using Services;
+using StackExchange.Redis;
 using System.Security.Claims;
 using System.Text;
 
@@ -17,7 +20,28 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     )
 );
 
+// DynamoDB
+builder.Services.AddSingleton<IAmazonDynamoDB>(_ =>
+{
+    var config = new AmazonDynamoDBConfig
+    {
+        ServiceURL = builder.Configuration["DynamoDB:ServiceURL"],
+        AuthenticationRegion = builder.Configuration["DynamoDB:Region"]
+    };
+
+    var credentials = new BasicAWSCredentials(
+        builder.Configuration["DynamoDB:AccessKey"],
+        builder.Configuration["DynamoDB:SecretKey"]
+    );
+
+    return new AmazonDynamoDBClient(credentials, config);
+});
+
+// Redis
+builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(builder.Configuration["Redis:ConnectionString"]!));
+
 builder.Services.AddScoped<ICatalogoService, CatalogoService>();
+builder.Services.AddScoped<IEventLogService, DynamoEventLogService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
