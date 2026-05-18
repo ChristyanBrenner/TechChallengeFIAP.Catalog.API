@@ -19,13 +19,13 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Restore
-        run: dotnet restore TechChallengeFIAP.Catalog.API.sln
+        run: dotnet restore CloudGames.Catalog.API.sln
 
       - name: Build
-        run: dotnet build TechChallengeFIAP.Catalog.API.sln --configuration Release --no-restore
+        run: dotnet build CloudGames.Catalog.API.sln --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test TechChallengeFIAP.Catalog.API.sln --no-build --configuration Release
+        run: dotnet test CloudGames.Catalog.API.sln --no-build --configuration Release
 
   docker:
     needs: build-test
