@@ -129,6 +129,8 @@ app.UseSwaggerUI();
 app.UseAuthentication();
 app.UseAuthorization();
 
+
+//teste github actions
 app.MapControllers();
 app.Run();
 
