@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Middleware;
+using OpenSearch.Client;
 using Repositories;
 using Services;
 using StackExchange.Redis;
@@ -23,22 +24,32 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // DynamoDB
 builder.Services.AddSingleton<IAmazonDynamoDB>(_ =>
 {
+    var region = builder.Configuration["DynamoDB:Region"];
+
     var config = new AmazonDynamoDBConfig
     {
-        ServiceURL = builder.Configuration["DynamoDB:ServiceURL"],
-        AuthenticationRegion = builder.Configuration["DynamoDB:Region"]
+        RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(region)
     };
 
-    var credentials = new BasicAWSCredentials(
-        builder.Configuration["DynamoDB:AccessKey"],
-        builder.Configuration["DynamoDB:SecretKey"]
-    );
-
-    return new AmazonDynamoDBClient(credentials, config);
+    return new AmazonDynamoDBClient(config);
 });
 
 // Redis
-builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(builder.Configuration["Redis:ConnectionString"]!));
+builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
+    ConnectionMultiplexer.Connect(builder.Configuration["Redis:ConnectionString"]!));
+
+//OpenSearch
+var openSearchUrl = builder.Configuration["OpenSearch:Url"];
+var openSearchUser = builder.Configuration["OpenSearch:Username"];
+var openSearchPassword = builder.Configuration["OpenSearch:Password"];
+var openSearchIndex = builder.Configuration["OpenSearch:Index"] ?? "games";
+
+var settings = new ConnectionSettings(new Uri(openSearchUrl))
+    .BasicAuthentication(openSearchUser, openSearchPassword)
+    .DefaultIndex(openSearchIndex);
+
+builder.Services.AddSingleton<IOpenSearchClient>(new OpenSearchClient(settings));
+builder.Services.AddScoped<IGameSearchService, OpenSearchGameSearchService>();
 
 builder.Services.AddScoped<ICatalogoService, CatalogoService>();
 builder.Services.AddScoped<IEventLogService, DynamoEventLogService>();

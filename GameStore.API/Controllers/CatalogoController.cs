@@ -10,9 +10,21 @@ namespace Controllers
     public class CatalogoController : ControllerBase
     {
         private readonly ICatalogoService _catalogo;
-        public CatalogoController(ICatalogoService jogo)
+        private readonly IGameSearchService _search;
+        public CatalogoController(ICatalogoService jogo, IGameSearchService search)
         {
             _catalogo = jogo;
+            _search = search;
+        }
+        [HttpGet("/search")]
+        public async Task<IActionResult> Search([FromQuery] string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return BadRequest("Informe o termo de busca.");
+
+            var result = await _search.BuscarAsync(query);
+
+            return Ok(result);
         }
 
         [Authorize]

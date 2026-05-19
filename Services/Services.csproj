@@ -12,11 +12,11 @@
     <PackageReference Include="MassTransit" Version="8.0.0" />
     <PackageReference Include="MassTransit.RabbitMQ" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.9" />
+    <PackageReference Include="OpenSearch.Client" Version="1.2.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.13.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\TechChallengeFIAP.Contracts\CloudGames.Contracts\CloudGames.Contracts.csproj" />
     <ProjectReference Include="..\Domain\Domain.csproj" />
     <ProjectReference Include="..\Repositories\Repositories.csproj" />
     <ProjectReference Include="..\Utils\Utils.csproj" />

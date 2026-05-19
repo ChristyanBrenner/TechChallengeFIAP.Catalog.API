@@ -14,13 +14,15 @@ namespace Services
         private readonly SqsService _sqsService;
         private readonly IDatabase _cache;
         private readonly IEventLogService _eventLogService;
+        private readonly IGameSearchService _gameSearchService;
 
-        public CatalogoService(AppDbContext ctx, SqsService sqsService, IConnectionMultiplexer redis, IEventLogService eventLogService)
+        public CatalogoService(AppDbContext ctx, SqsService sqsService, IConnectionMultiplexer redis, IEventLogService eventLogService, IGameSearchService gameSearchService)
         {
             _ctx = ctx;
             _sqsService = sqsService;
             _cache = redis.GetDatabase();
             _eventLogService = eventLogService;
+            _gameSearchService = gameSearchService;
         }
         public async Task<List<Jogo>> ListarJogosAsync()
         {
@@ -92,7 +94,7 @@ namespace Services
                     jogo.Preco
                 })
             });
-
+            await _gameSearchService.IndexarJogoAsync(jogo);
             await _cache.KeyDeleteAsync("catalogo:jogos");
 
             return jogo.Id;
@@ -119,7 +121,7 @@ namespace Services
                     jogo.Preco
                 })
             });
-
+            await _gameSearchService.AtualizarJogoAsync(jogo);
             await _cache.KeyDeleteAsync("catalogo:jogos");
             await _cache.KeyDeleteAsync($"catalogo:jogo:{id}");
         }

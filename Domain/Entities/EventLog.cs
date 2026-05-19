@@ -8,7 +8,7 @@ namespace Domain.Entities
 {
     public class EventLog
     {
-        public string EventId { get; set; } = Guid.NewGuid().ToString();
+        public Guid EventId { get; set; } = Guid.NewGuid();
         public string EventType { get; set; } = string.Empty;
         public string Source { get; set; } = "CatalogAPI";
         public string Payload { get; set; } = string.Empty;
