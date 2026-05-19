@@ -140,7 +140,7 @@ app.UseSwaggerUI();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// testando gitgub actions pipeline
+// pipeline
 
 app.MapControllers();
 app.Run();
