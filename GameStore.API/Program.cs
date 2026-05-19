@@ -141,7 +141,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 
-//teste github actions
+// teste github actions
+
 app.MapControllers();
 app.Run();
 
